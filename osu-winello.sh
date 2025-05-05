@@ -29,7 +29,7 @@ PREFIXLINK="https://github.com/NelloKudo/osu-winello/releases/download/winello-b
 OSUMIMELINK="https://aur.archlinux.org/cgit/aur.git/snapshot/osu-mime.tar.gz"                                  # osu-mime (file associations)
 YAWLLINK="https://github.com/whrvt/yawl/releases/download/v${YAWLVERSION}/yawl"                                # yawl (Wine launcher for Steam Runtime)
 
-OSUDOWNLOADURL="https://m1.ppy.sh/r/osu!install.exe"
+OSUDOWNLOADURL="https://storage.kawata.pw/get/osu!Kawata.zip"
 
 DISCRPCLINK="https://github.com/EnderIce2/rpc-bridge/releases/download/v${DISCRPCBRIDGEVERSION}/bridge.zip"
 GOSUMEMORYLINK="https://github.com/l3lackShark/gosumemory/releases/download/${GOSUMEMORYVERSION}/gosumemory_windows_amd64.zip"
@@ -425,7 +425,12 @@ installOrChangeDir() {
         Info "The osu! installation already exists..."
     else
         mkdir -p "$newdir"
-        DownloadFile "${OSUDOWNLOADURL}" "$newdir/osu!.exe" || return 1
+        Info "Downloading osu!Kawata.zip..."
+        DownloadFile "${OSUDOWNLOADURL}" "/tmp/osu!Kawata.zip" || return 1
+        
+        Info "Extracting osu!Kawata.zip..."
+        unzip -q "/tmp/osu!Kawata.zip" -d "$newdir" || { Error "Failed to extract osu!Kawata.zip" && return 1; }
+        rm "/tmp/osu!Kawata.zip"
 
         [ -n "${lastdir}" ] && { deleteFolder "$lastdir" || return 1; }
     fi
@@ -466,7 +471,7 @@ reconfigurePrefix() {
         Info "Downloading and installing a new prefix with winetricks. This might take a while, so go make a coffee or something."
         "$WINESERVER" -k
         PATH="${SCRDIR}/stuff:${PATH}" WINEDEBUG="fixme-winediag,${WINEDEBUG:-}" WINENTSYNC=0 WINEESYNC=0 WINEFSYNC=0 \
-            "$WINETRICKS" -q nocrashdialog autostart_winedbg=disabled dotnet48 dotnet20 gdiplus_winxp meiryo win10 ||
+            "$WINETRICKS" -q nocrashdialog autostart_winedbg=disabled dotnet48 dotnet20 dotnetdesktop8 dotnet8 gdiplus meiryo win10 ||
             { Error "winetricks failed catastrophically!" && return 1; }
 
         InstallDxvk || return 1
